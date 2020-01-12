@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:klassenk_mobile/pages/pay_table.dart';
 import 'package:klassenk_mobile/student.dart';
 
 class Home extends StatefulWidget {
@@ -18,15 +19,38 @@ class _HomeState extends State<Home> {
     Student(name: "DeVito", vorname: "Danny", balance: 900),
   ];
 
+  List<Student> selection = [];
+
   DataRow tableRow(stud) {
-    return DataRow(cells: [
-      DataCell(
-        Text(stud.name),
-        //onTap: ,
-      ),
-      DataCell(Text(stud.vorname)),
-      DataCell(Text((stud.balance).toString())),
-    ]);
+    return DataRow(
+        selected: selection.contains(stud),
+        onSelectChanged: (sel) {
+          print(stud.name);
+          onSelectedRow(sel, stud);
+        },
+        //selected: true,
+        cells: [
+          DataCell(
+            Text(stud.name,
+            style: TextStyle(
+              //fontSize: 14,
+            ),),
+            //onTap: ,
+          ),
+          //DataCell(Text(stud.vorname)),
+          DataCell(Text(1 < 0 ? "yeet" : "yaat")),
+          DataCell(Text((stud.balance).toString())),
+        ]);
+  }
+
+  onSelectedRow(bool sel, Student stud) async {
+    setState(() {
+      if (sel == true) {
+        selection.add(stud);
+      } else {
+        selection.remove(stud);
+      }
+    });
   }
 
   Widget addDialog() {
@@ -41,14 +65,16 @@ class _HomeState extends State<Home> {
               decoration: InputDecoration(
                 hintText: "Nachname",
               ),
-              validator: (input) => input.length == 0 ? "Name erforderlich" : null,
+              validator: (input) =>
+                  input.length == 0 ? "Name erforderlich" : null,
               onSaved: (input) => name = input,
             ),
             TextFormField(
               decoration: InputDecoration(
                 hintText: "Vorname",
               ),
-              validator: (input) => input.length == 0 ? "Vorname erforderlich" : null,
+              validator: (input) =>
+                  input.length == 0 ? "Vorname erforderlich" : null,
               onSaved: (input) => vorname = input,
             ),
             TextFormField(
@@ -64,7 +90,7 @@ class _HomeState extends State<Home> {
             RaisedButton(
               onPressed: () {
                 submit();
-                },
+              },
               child: Text("Speichern"),
             )
           ],
@@ -72,7 +98,7 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-  
+
   void submit() {
     if (formKey.currentState.validate()) {
       formKey.currentState.save();
@@ -94,19 +120,36 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text("Übersicht"),
         backgroundColor: Colors.green,
-      ),
-      body: ListView(
-        children: <Widget>[
-          DataTable(
-            columns: [
-              DataColumn(label: Text("Name")),
-              DataColumn(label: Text("Vorname")),
-              DataColumn(label: Text("Guthaben"), numeric: true),
-            ],
-            rows: students.map((student) => tableRow(student)).toList(),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.select_all),
+            onPressed: () {
+              //Future.delayed(Duration(seconds: 3), () {}
+              Navigator.pushNamed(context, "/pay_table"); //test, remove later
+            },
           ),
+          IconButton(
+            icon: Icon(Icons.attach_money),
+            onPressed: () {
+              enterPayment(selection);
+            },
+          )
         ],
       ),
+      body: ListView(
+          children: <Widget>[
+            DataTable(
+      horizontalMargin: 15,
+      //columnSpacing: 10,
+      columns: [
+        DataColumn(label: Text("Name")),
+        DataColumn(label: Text("Vorname")),
+        DataColumn(label: Text("Guthaben"), numeric: true),
+      ],
+      rows: students.map((student) => tableRow(student)).toList(),
+            ),
+          ],
+        ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {
@@ -121,4 +164,8 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+}
+
+void enterPayment(selection) {
+  selection.map((student) => print(student.name)).toList();
 }

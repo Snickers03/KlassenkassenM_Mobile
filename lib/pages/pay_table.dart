@@ -9,8 +9,12 @@ class PayTable extends StatefulWidget {
 class _PayTableState extends State<PayTable> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text("sdljg"),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.green,
+        title: Text("Zahlungen"),
+      ),
+      body: Text("sdljg"),
     );
   }
 }
