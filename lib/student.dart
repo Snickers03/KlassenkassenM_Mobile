@@ -9,5 +9,7 @@ class Student {
 
   Student( {this.name, this.vorname, this.balance} );
 
-  List<Payment> payments;
+  List<Payment> payments = [
+    Payment(date: "18.01.20", reason: "Beispiel", amount: 50),
+  ];
 }

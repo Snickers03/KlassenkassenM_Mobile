@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:klassenk_mobile/pages/pay_table.dart';
+import 'package:klassenk_mobile/payment.dart';
 import 'package:klassenk_mobile/student.dart';
 
 class Home extends StatefulWidget {
@@ -31,16 +32,28 @@ class _HomeState extends State<Home> {
         //selected: true,
         cells: [
           DataCell(
-            Text(stud.name,
-            style: TextStyle(
-              //fontSize: 14,
-            ),),
-            //onTap: ,
+            Text(
+              stud.name,
+              style: TextStyle(
+                  //fontSize: 14,
+                  ),
+            ),
+            onTap: () {
+              rowTapped(stud);
+            },
           ),
-          //DataCell(Text(stud.vorname)),
-          DataCell(Text(1 < 0 ? "yeet" : "yaat")),
-          DataCell(Text((stud.balance).toString())),
+          DataCell(Text(stud.vorname), onTap: () {
+            rowTapped(stud);
+          }),
+          DataCell(Text(stud.balance.toString()), onTap: () {
+            rowTapped(stud);
+          }),
         ]);
+  }
+
+  void rowTapped(stud) {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => PayTable(stud: stud)));
   }
 
   onSelectedRow(bool sel, Student stud) async {
@@ -89,7 +102,7 @@ class _HomeState extends State<Home> {
             ),
             RaisedButton(
               onPressed: () {
-                submit();
+                submitStud();
               },
               child: Text("Speichern"),
             )
@@ -99,7 +112,53 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void submit() {
+  Widget payDialog() {
+    return AlertDialog(
+      title: Text("Zahlung erfassen"),
+      content: Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            /*TextFormField(
+              decoration: InputDecoration(
+                hintText: "Datum",
+              ),
+              validator: (input) =>
+                  input.length == 0 ? "Name erforderlich" : null,
+              onSaved: (input) => datum = input,
+            ),*/
+            TextFormField(
+              decoration: InputDecoration(
+                hintText: "Zahlungsgrund",
+              ),
+              validator: (input) =>
+                  input.length == 0 ? "Grund erforderlich" : null,
+              onSaved: (input) => reason = input,
+            ),
+            TextFormField(
+              decoration: InputDecoration(
+                hintText: "Betrag",
+              ),
+              keyboardType: TextInputType.number,
+              /*inputFormatters: <TextInputFormatter>[
+                WhitelistingTextInputFormatter.digitsOnly
+              ],*/
+              onSaved: (input) => amount = double.parse(input),
+            ),
+            RaisedButton(
+              onPressed: () {
+                submitPay();
+              },
+              child: Text("Speichern"),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void submitStud() {
     if (formKey.currentState.validate()) {
       formKey.currentState.save();
       Navigator.pop(context);
@@ -109,10 +168,28 @@ class _HomeState extends State<Home> {
     }
   }
 
+  void submitPay() {
+    if (formKey.currentState.validate()) {
+      formKey.currentState.save();
+      Navigator.pop(context);
+      setState(() {
+        for (int i = 0; i < selection.length; i++) {
+          selection[i]
+              .payments
+              .add(Payment(date: "datum", reason: reason, amount: amount));
+        }
+      });
+    }
+  }
+
   final formKey = GlobalKey<FormState>();
   String name;
   String vorname;
   double balance;
+
+  String date;
+  String reason;
+  double amount;
 
   @override
   Widget build(BuildContext context) {
@@ -125,31 +202,49 @@ class _HomeState extends State<Home> {
             icon: Icon(Icons.select_all),
             onPressed: () {
               //Future.delayed(Duration(seconds: 3), () {}
-              Navigator.pushNamed(context, "/pay_table"); //test, remove later
+              //PayTable(stud: students[0]);
+              //test, remove later
             },
           ),
           IconButton(
             icon: Icon(Icons.attach_money),
-            onPressed: () {
-              enterPayment(selection);
+            onPressed: () {             
+              if (selection.length <= 0) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                  title: Text("Kein Schüler ausgewählt"),
+                );
+                  });
+                
+              } else {
+                setState(() {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return payDialog();
+                      });
+                });
+              }
             },
           )
         ],
       ),
       body: ListView(
-          children: <Widget>[
-            DataTable(
-      horizontalMargin: 15,
-      //columnSpacing: 10,
-      columns: [
-        DataColumn(label: Text("Name")),
-        DataColumn(label: Text("Vorname")),
-        DataColumn(label: Text("Guthaben"), numeric: true),
-      ],
-      rows: students.map((student) => tableRow(student)).toList(),
-            ),
-          ],
-        ),
+        children: <Widget>[
+          DataTable(
+            horizontalMargin: 15,
+            //columnSpacing: 10,
+            columns: [
+              DataColumn(label: Text("Name")),
+              DataColumn(label: Text("Vorname")),
+              DataColumn(label: Text("Guthaben"), numeric: true),
+            ],
+            rows: students.map((student) => tableRow(student)).toList(),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {
@@ -164,8 +259,4 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-}
-
-void enterPayment(selection) {
-  selection.map((student) => print(student.name)).toList();
 }
