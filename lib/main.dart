@@ -6,6 +6,6 @@ void main() => runApp(MaterialApp(
   initialRoute: '/home',
       routes: {
         '/home': (context) => Home(),
-        '/pay_table': (context) => PayTable(),
+        '/pay_table': (context) => PayTable(stud: null,),
       },
 ));
