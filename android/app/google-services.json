@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "532295261821",
+    "firebase_url": "https://klassenkassenmanager-mobile.firebaseio.com",
+    "project_id": "klassenkassenmanager-mobile",
+    "storage_bucket": "klassenkassenmanager-mobile.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:532295261821:android:2e7a375cf84931f7bd1b14",
+        "android_client_info": {
+          "package_name": "ch.nicsch.klassenkassenmanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "532295261821-m0k9ibf3uddinigooh6vsjqs85k6mkfl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxS-aIzW4D-sAK5bovKXlj8FA0R4-9mqA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "532295261821-m0k9ibf3uddinigooh6vsjqs85k6mkfl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
