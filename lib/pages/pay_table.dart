@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:klassenk_mobile/student.dart';
+import 'package:intl/intl.dart';
 
 class PayTable extends StatefulWidget {
   final Student stud;
@@ -10,10 +11,12 @@ class PayTable extends StatefulWidget {
 }
 
 class _PayTableState extends State<PayTable> {
+
+  var form = DateFormat('dd.MM.yy');
   
   DataRow payRow(payment) {
     return DataRow(cells: [
-      DataCell(Text(payment.date)),
+      DataCell(Text(form.format(payment.date))),
       DataCell(Text(payment.reason)),
       DataCell(Text(payment.amount.toString())),
     ]);

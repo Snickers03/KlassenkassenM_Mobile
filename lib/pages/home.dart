@@ -15,9 +15,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List<Student> students = [
-    Student(name: "Schellenbaum", vorname: "Nic", balance: 500),
-    Student(name: "Maurer", vorname: "Ueli", balance: 4539054),
-    Student(name: "DeVito", vorname: "Danny", balance: 900),
+    Student(name: "Schellenbaum", vorname: "Nic", balance: 50),
+    Student(name: "Maurer", vorname: "Ueli", balance: 50),
+    Student(name: "DeVito", vorname: "Danny", balance: 50),
   ];
 
   List<Student> selection = [];
@@ -141,9 +141,7 @@ class _HomeState extends State<Home> {
                 hintText: "Betrag",
               ),
               keyboardType: TextInputType.number,
-              /*inputFormatters: <TextInputFormatter>[
-                WhitelistingTextInputFormatter.digitsOnly
-              ],*/
+              /*inputFormatters: <DecimalTextInputFormatter()*/
               onSaved: (input) => amount = double.parse(input),
             ),
             RaisedButton(
@@ -176,7 +174,9 @@ class _HomeState extends State<Home> {
         for (int i = 0; i < selection.length; i++) {
           selection[i]
               .payments
-              .add(Payment(date: "datum", reason: reason, amount: amount));
+              .add(Payment(date: DateTime.now(), reason: reason, amount: amount));
+
+          selection[i].balance += amount;
         }
       });
     }
