@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:klassenk_mobile/authenticate/authenticate.dart';
 import 'package:klassenk_mobile/pages/pay_table.dart';
 import 'package:klassenk_mobile/payment.dart';
 import 'package:klassenk_mobile/student.dart';
@@ -172,9 +173,8 @@ class _HomeState extends State<Home> {
       Navigator.pop(context);
       setState(() {
         for (int i = 0; i < selection.length; i++) {
-          selection[i]
-              .payments
-              .add(Payment(date: DateTime.now(), reason: reason, amount: amount));
+          selection[i].payments.add(
+              Payment(date: DateTime.now(), reason: reason, amount: amount));
 
           selection[i].balance += amount;
         }
@@ -191,6 +191,8 @@ class _HomeState extends State<Home> {
   String reason;
   double amount;
 
+  final AuthService _auth = AuthService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -199,8 +201,9 @@ class _HomeState extends State<Home> {
         backgroundColor: Colors.green,
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.select_all),
-            onPressed: () {
+            icon: Icon(Icons.person),
+            onPressed: () async {
+              await _auth.signOut();
               //Future.delayed(Duration(seconds: 3), () {}
               //PayTable(stud: students[0]);
               //test, remove later
@@ -208,16 +211,15 @@ class _HomeState extends State<Home> {
           ),
           IconButton(
             icon: Icon(Icons.attach_money),
-            onPressed: () {             
+            onPressed: () {
               if (selection.length <= 0) {
                 showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                  title: Text("Kein Schüler ausgewählt"),
-                );
-                  });
-                
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text("Kein Schüler ausgewählt"),
+                      );
+                    });
               } else {
                 setState(() {
                   showDialog(
@@ -228,6 +230,20 @@ class _HomeState extends State<Home> {
                 });
               }
             },
+          ),
+          PopupMenuButton(
+            //onSelected: (result) { setState(() { _selection = result; }); },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry> [
+              PopupMenuItem(
+                child: FlatButton(
+                  child: Text("Test"),
+                  onPressed: () {print("test");},
+                  ),
+              ),
+              PopupMenuItem(
+                child: Text("Abmelden"),
+              ),
+            ]
           )
         ],
       ),

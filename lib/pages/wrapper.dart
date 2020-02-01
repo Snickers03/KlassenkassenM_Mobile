@@ -11,7 +11,7 @@ class Wrapper extends StatelessWidget {
     final user = Provider.of<User>(context);
     print("hello: $user");
 
-    return AuthScreen(); 
+    return user == null ? AuthScreen() : Home(); 
     
     //return Home();
 
