@@ -7,13 +7,11 @@ import 'package:klassenk_mobile/models/user.dart';
 class Wrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    
     final user = Provider.of<User>(context);
-    print("hello: $user");
+    if (user != null) {
+      print("hello: ${user.uid}");
+    }
 
-    return user == null ? AuthScreen() : Home(); 
-    
-    //return Home();
-
+    return user == null ? AuthScreen() : Home(); //display authenticate or home
   }
 }

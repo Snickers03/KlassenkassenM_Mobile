@@ -193,60 +193,77 @@ class _HomeState extends State<Home> {
 
   final AuthService _auth = AuthService();
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Übersicht"),
-        backgroundColor: Colors.green,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.person),
-            onPressed: () async {
-              await _auth.signOut();
-              //Future.delayed(Duration(seconds: 3), () {}
-              //PayTable(stud: students[0]);
-              //test, remove later
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.attach_money),
-            onPressed: () {
-              if (selection.length <= 0) {
+  AppBar bar() {
+    return AppBar(
+      title: Text("Übersicht"),
+      backgroundColor: Colors.green,
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () async {
+            //await _auth.signOut();
+            setState(() {
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return addDialog();
+                });
+          });
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.attach_money),
+          onPressed: () {
+            if (selection.length <= 0) {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text("Kein Schüler ausgewählt"),
+                    );
+                  });
+            } else {
+              setState(() {
                 showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text("Kein Schüler ausgewählt"),
-                      );
+                      return payDialog();
                     });
-              } else {
-                setState(() {
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return payDialog();
-                      });
-                });
-              }
-            },
-          ),
-          PopupMenuButton(
+              });
+            }
+          },
+        ),
+        PopupMenuButton(
             //onSelected: (result) { setState(() { _selection = result; }); },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry> [
-              PopupMenuItem(
-                child: FlatButton(
-                  child: Text("Test"),
-                  onPressed: () {print("test");},
+            itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+                  PopupMenuItem(
+                    value: 1,
+                    child: Text("Test"),
                   ),
-              ),
-              PopupMenuItem(
-                child: Text("Abmelden"),
-              ),
-            ]
-          )
-        ],
-      ),
+                  PopupMenuDivider(
+                    height: 5,
+                  ),
+                  PopupMenuItem(
+                    value: 2,
+                    child: Text("Abmelden"),
+                  ),
+                ],
+                onSelected: (value) async {
+                  print(value);
+                  switch (value) {
+                    case 1: { print("test"); break; }
+                    case 2: { await _auth.signOut(); break; }
+                    default: { print("error"); break; }
+                  }
+                },)
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: bar(),
       body: ListView(
         children: <Widget>[
           DataTable(
@@ -261,7 +278,7 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      /*floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {
             showDialog(
@@ -272,7 +289,7 @@ class _HomeState extends State<Home> {
           });
         },
         child: Icon(Icons.add),
-      ),
+      ),*/
     );
   }
 }
