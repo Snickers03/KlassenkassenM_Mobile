@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:klassenk_mobile/services/authenticate.dart';
 import 'package:klassenk_mobile/pages/home.dart';
+import 'package:klassenk_mobile/shared/loading.dart';
 
 class SignIn extends StatefulWidget {
   final Function toggleView;
@@ -18,15 +19,18 @@ class _SignInState extends State<SignIn> {
   String email;
   String password;
   String error = "";
+  bool loading = false;
 
   void submit() async {
     if (formKey.currentState.validate()) {
+      setState(() => loading = true);
       formKey.currentState.save();
       print("email: $email");
       print("password: $password");
       dynamic result = await _auth.signInEmail(email, password);
       if (result == null) {
         setState(() {
+          loading = false;
           error = "E-Mail oder Passwort falsch";
         });
       }
@@ -35,7 +39,7 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return loading ? Loading() : Scaffold(
       appBar: AppBar(
         title: Text("Anmelden"),
         backgroundColor: Colors.green,

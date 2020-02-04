@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:klassenk_mobile/services/authenticate.dart';
+import 'package:klassenk_mobile/shared/loading.dart';
 
 class Register extends StatefulWidget {
 
@@ -19,6 +20,7 @@ class _RegisterState extends State<Register> {
   String password;
   String repeatPassword;
   String error = "";
+  bool loading = false;
 
   void submit() async {
     if (formKey.currentState.validate()) {
@@ -31,9 +33,12 @@ class _RegisterState extends State<Register> {
         });
         return;
       }
+      setState(() => loading = true);
       dynamic result = await _auth.registerEmail(email, password);
+      
       if (result == null) {
         setState(() {
+          loading = false;
           error = "Ungültige E-Mail";
         });
       }
@@ -42,7 +47,7 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return loading ? Loading() : Scaffold(
       appBar: AppBar(
         title: Text("Registrieren"),
         backgroundColor: Colors.green,

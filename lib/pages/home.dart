@@ -4,6 +4,7 @@ import 'package:klassenk_mobile/services/authenticate.dart';
 import 'package:klassenk_mobile/pages/pay_table.dart';
 import 'package:klassenk_mobile/payment.dart';
 import 'package:klassenk_mobile/student.dart';
+import 'package:klassenk_mobile/shared/loading.dart';
 
 class Home extends StatefulWidget {
   /*Home({Key key, this.title}) : super(key: key);
