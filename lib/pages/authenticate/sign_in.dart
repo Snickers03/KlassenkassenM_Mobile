@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:klassenk_mobile/authenticate/authenticate.dart';
+import 'package:klassenk_mobile/services/authenticate.dart';
 import 'package:klassenk_mobile/pages/home.dart';
 
 class SignIn extends StatefulWidget {

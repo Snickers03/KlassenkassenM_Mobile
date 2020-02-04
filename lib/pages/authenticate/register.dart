@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:klassenk_mobile/authenticate/authenticate.dart';
+import 'package:klassenk_mobile/services/authenticate.dart';
 
 class Register extends StatefulWidget {
 

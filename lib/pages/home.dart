@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:klassenk_mobile/authenticate/authenticate.dart';
+import 'package:klassenk_mobile/services/authenticate.dart';
 import 'package:klassenk_mobile/pages/pay_table.dart';
 import 'package:klassenk_mobile/payment.dart';
 import 'package:klassenk_mobile/student.dart';
