@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:klassenk_mobile/models/user.dart';
 import 'package:klassenk_mobile/services/database.dart';
-import 'package:klassenk_mobile/student.dart';
+import 'package:klassenk_mobile/models/student.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -55,7 +55,7 @@ class AuthService {
       AuthResult result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       FirebaseUser user = result.user;
-      await DatabaseService(uid: user.uid).updateUserData("Urs", "Müller", 420);
+      await DatabaseService(uid: user.uid).updateUserData(email);
       return _createUser(user);
     } catch (e) {
       print(e.toString());

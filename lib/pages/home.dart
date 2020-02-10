@@ -1,15 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:klassenk_mobile/services/authenticate.dart';
 import 'package:klassenk_mobile/pages/pay_table.dart';
-import 'package:klassenk_mobile/payment.dart';
-import 'package:klassenk_mobile/student.dart';
+import 'package:klassenk_mobile/models/payment.dart';
+import 'package:klassenk_mobile/models/student.dart';
 import 'package:klassenk_mobile/shared/loading.dart';
+import 'package:provider/provider.dart';
+import 'package:klassenk_mobile/services/database.dart';
+import 'package:klassenk_mobile/models/user.dart';
 
 class Home extends StatefulWidget {
-  /*Home({Key key, this.title}) : super(key: key);
-
-  final String title;*/
+  Home({Key key, this.user}) : super(key: key);
+  final User user;
+  //final String title;
 
   @override
   _HomeState createState() => _HomeState();
@@ -51,6 +55,10 @@ class _HomeState extends State<Home> {
             rowTapped(stud);
           }),
         ]);
+  }
+
+  bool isSelected(stud) {
+    return selection.contains(stud);
   }
 
   void rowTapped(stud) {
@@ -162,9 +170,10 @@ class _HomeState extends State<Home> {
     if (formKey.currentState.validate()) {
       formKey.currentState.save();
       Navigator.pop(context);
-      setState(() {
+      DatabaseService().updateStudentData(name, vorname, balance, widget.user.uid);
+      /*setState(() {
         students.add(Student(name: name, vorname: vorname, balance: balance));
-      });
+      });*/
     }
   }
 
@@ -263,34 +272,36 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final students = Provider.of<List<Student>>(context) ?? [];
     return Scaffold(
-      appBar: bar(),
-      body: ListView(
-        children: <Widget>[
-          DataTable(
-            horizontalMargin: 15,
-            //columnSpacing: 10,
-            columns: [
-              DataColumn(label: Text("Name")),
-              DataColumn(label: Text("Vorname")),
-              DataColumn(label: Text("Guthaben"), numeric: true),
-            ],
-            rows: students.map((student) => tableRow(student)).toList(),
-          ),
+        appBar: bar(),
+        body: ListView(
+    children: <Widget>[
+      DataTable(
+        horizontalMargin: 15,
+        //columnSpacing: 10,
+        columns: [
+          DataColumn(label: Text("Name")),
+          DataColumn(label: Text("Vorname")),
+          DataColumn(label: Text("Guthaben"), numeric: true),
         ],
+        rows: students.map((student) => tableRow(student)).toList(),
       ),
-      /*floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return addDialog();
-                });
-          });
-        },
-        child: Icon(Icons.add),
-      ),*/
-    );
+      //StudentList(selection: selection, rowTapped: rowTapped, onSelectedRow: onSelectedRow, isSelected: isSelected,),
+    ],
+        ),
+        /*floatingActionButton: FloatingActionButton(
+    onPressed: () {
+      setState(() {
+        showDialog(
+            context: context,S
+            builder: (BuildContext context) {
+              return addDialog();
+            });
+      });
+    },
+    child: Icon(Icons.add),
+        ),*/
+      );
   }
 }

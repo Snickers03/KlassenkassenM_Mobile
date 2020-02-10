@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:klassenk_mobile/student.dart';
+import 'package:klassenk_mobile/models/student.dart';
 import 'package:intl/intl.dart';
 
 class PayTable extends StatefulWidget {
