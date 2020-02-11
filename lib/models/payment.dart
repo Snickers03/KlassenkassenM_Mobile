@@ -1,5 +1,5 @@
 class Payment {
-  DateTime date;
+  String date;
   String reason;
   double amount;
 

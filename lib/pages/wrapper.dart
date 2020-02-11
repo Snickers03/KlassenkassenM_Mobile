@@ -15,7 +15,7 @@ class Wrapper extends StatelessWidget {
     }
 
     return user == null ? AuthScreen() : StreamProvider<List<Student>>.value(
-      value: DatabaseService().students,
+      value: DatabaseService(user: user).students,
       child: Home(user: user)); //display authenticate or home
   }
 }

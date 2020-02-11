@@ -9,6 +9,7 @@ import 'package:klassenk_mobile/shared/loading.dart';
 import 'package:provider/provider.dart';
 import 'package:klassenk_mobile/services/database.dart';
 import 'package:klassenk_mobile/models/user.dart';
+import 'package:intl/intl.dart';
 
 class Home extends StatefulWidget {
   Home({Key key, this.user}) : super(key: key);
@@ -20,11 +21,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<Student> students = [
+  /*List<Student> students = [
     Student(name: "Schellenbaum", vorname: "Nic", balance: 50),
     Student(name: "Maurer", vorname: "Ueli", balance: 50),
     Student(name: "DeVito", vorname: "Danny", balance: 50),
-  ];
+  ];*/
 
   List<Student> selection = [];
 
@@ -61,9 +62,13 @@ class _HomeState extends State<Home> {
     return selection.contains(stud);
   }
 
-  void rowTapped(stud) {
+  void rowTapped(Student stud) {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => PayTable(stud: stud)));
+        context,
+        MaterialPageRoute(
+            builder: (context) => StreamProvider<List<Payment>>.value(
+                value: DatabaseService(student: stud).payments,
+                child: PayTable(stud: stud))));
   }
 
   onSelectedRow(bool sel, Student stud) async {
@@ -170,7 +175,8 @@ class _HomeState extends State<Home> {
     if (formKey.currentState.validate()) {
       formKey.currentState.save();
       Navigator.pop(context);
-      DatabaseService().updateStudentData(name, vorname, balance, widget.user.uid);
+      DatabaseService()
+          .updateStudentData(name, vorname, balance, widget.user.uid);
       /*setState(() {
         students.add(Student(name: name, vorname: vorname, balance: balance));
       });*/
@@ -184,7 +190,7 @@ class _HomeState extends State<Home> {
       setState(() {
         for (int i = 0; i < selection.length; i++) {
           selection[i].payments.add(
-              Payment(date: DateTime.now(), reason: reason, amount: amount));
+              Payment(date: DateFormat("dd.MM.yy").format(DateTime.now()), reason: reason, amount: amount));  //https://stackoverflow.com/questions/51696478/datetime-flutter
 
           selection[i].balance += amount;
         }
@@ -213,12 +219,12 @@ class _HomeState extends State<Home> {
           onPressed: () async {
             //await _auth.signOut();
             setState(() {
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return addDialog();
-                });
-          });
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return addDialog();
+                  });
+            });
           },
         ),
         IconButton(
@@ -244,28 +250,41 @@ class _HomeState extends State<Home> {
           },
         ),
         PopupMenuButton(
-            //onSelected: (result) { setState(() { _selection = result; }); },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-                  PopupMenuItem(
-                    value: 1,
-                    child: Text("Test"),
-                  ),
-                  PopupMenuDivider(
-                    height: 5,
-                  ),
-                  PopupMenuItem(
-                    value: 2,
-                    child: Text("Abmelden"),
-                  ),
-                ],
-                onSelected: (value) async {
-                  print(value);
-                  switch (value) {
-                    case 1: { print("test"); break; }
-                    case 2: { await _auth.signOut(); break; }
-                    default: { print("error"); break; }
-                  }
-                },)
+          //onSelected: (result) { setState(() { _selection = result; }); },
+          itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+            PopupMenuItem(
+              value: 1,
+              child: Text("Test"),
+            ),
+            PopupMenuDivider(
+              height: 5,
+            ),
+            PopupMenuItem(
+              value: 2,
+              child: Text("Abmelden"),
+            ),
+          ],
+          onSelected: (value) async {
+            print(value);
+            switch (value) {
+              case 1:
+                {
+                  print("test");
+                  break;
+                }
+              case 2:
+                {
+                  await _auth.signOut();
+                  break;
+                }
+              default:
+                {
+                  print("error");
+                  break;
+                }
+            }
+          },
+        )
       ],
     );
   }
@@ -274,23 +293,23 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final students = Provider.of<List<Student>>(context) ?? [];
     return Scaffold(
-        appBar: bar(),
-        body: ListView(
-    children: <Widget>[
-      DataTable(
-        horizontalMargin: 15,
-        //columnSpacing: 10,
-        columns: [
-          DataColumn(label: Text("Name")),
-          DataColumn(label: Text("Vorname")),
-          DataColumn(label: Text("Guthaben"), numeric: true),
+      appBar: bar(),
+      body: ListView(
+        children: <Widget>[
+          DataTable(
+            horizontalMargin: 15,
+            //columnSpacing: 10,
+            columns: [
+              DataColumn(label: Text("Name")),
+              DataColumn(label: Text("Vorname")),
+              DataColumn(label: Text("Guthaben"), numeric: true),
+            ],
+            rows: students.map((student) => tableRow(student)).toList(),
+          ),
+          //StudentList(selection: selection, rowTapped: rowTapped, onSelectedRow: onSelectedRow, isSelected: isSelected,),
         ],
-        rows: students.map((student) => tableRow(student)).toList(),
       ),
-      //StudentList(selection: selection, rowTapped: rowTapped, onSelectedRow: onSelectedRow, isSelected: isSelected,),
-    ],
-        ),
-        /*floatingActionButton: FloatingActionButton(
+      /*floatingActionButton: FloatingActionButton(
     onPressed: () {
       setState(() {
         showDialog(
@@ -302,6 +321,6 @@ class _HomeState extends State<Home> {
     },
     child: Icon(Icons.add),
         ),*/
-      );
+    );
   }
 }
