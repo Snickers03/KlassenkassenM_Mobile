@@ -176,7 +176,7 @@ class _HomeState extends State<Home> {
       formKey.currentState.save();
       Navigator.pop(context);
       DatabaseService()
-          .updateStudentData(name, vorname, balance, widget.user.uid);
+          .updateStudentData(null, name, vorname, balance, widget.user.uid);
       /*setState(() {
         students.add(Student(name: name, vorname: vorname, balance: balance));
       });*/
@@ -186,15 +186,19 @@ class _HomeState extends State<Home> {
   void submitPay() {
     if (formKey.currentState.validate()) {
       formKey.currentState.save();
+      List<String> idList = [];
+      date = DateFormat("dd.MM.yy").format(DateTime.now());
       Navigator.pop(context);
-      setState(() {
-        for (int i = 0; i < selection.length; i++) {
-          selection[i].payments.add(
-              Payment(date: DateFormat("dd.MM.yy").format(DateTime.now()), reason: reason, amount: amount));  //https://stackoverflow.com/questions/51696478/datetime-flutter
-
-          selection[i].balance += amount;
-        }
-      });
+      //setState(() {
+      for (int i = 0; i < selection.length; i++) {
+        //selection[i].payments.add(
+        // Payment(date: DateFormat("dd.MM.yy").format(DateTime.now()), reason: reason, amount: amount));  //https://stackoverflow.com/questions/51696478/datetime-flutter
+        idList.add(selection[i].studID);
+        DatabaseService().updateStudentData(selection[i].studID, selection[i].name, selection[i].vorname, selection[i].balance + amount, widget.user.uid);
+        //selection[i].balance += amount;
+      }
+      DatabaseService().updatePaymentData(date, reason, amount, idList);
+      //});
     }
   }
 

@@ -26,13 +26,22 @@ class DatabaseService {
     });
   }
 
-  Future updateStudentData(String name, String vorname, double balance, String userID) async {
+  Future updateStudentData(String uid, String name, String vorname, double balance, String userID) async {
     //print(this.uid);
     return await studentCollection.document(uid).setData({
       "name": name,
       "vorname": vorname,
       "balance": balance,
       "from": userID,
+    });
+  }
+
+  Future updatePaymentData(String date, String reason, double amount, List<String> selectedStudents) async {
+    return await paymentCollection.document(uid).setData({
+      "date": date,
+      "reason": reason,
+      "amount": amount,
+      "from": FieldValue.arrayUnion(selectedStudents),
     });
   }
 
@@ -75,8 +84,9 @@ class DatabaseService {
   }
 
   Stream<List<Payment>> get payments {
+    print(student.studID);
     return paymentCollection
-    //.where("from", isEqualTo: student.studID)   //law and order
+    .where("from", arrayContains: student.studID)   //law and order
     //.orderBy(field)
     .snapshots()
     .map(_paymentListFromSnapshot);
