@@ -187,14 +187,19 @@ class _HomeState extends State<Home> {
     if (formKey.currentState.validate()) {
       formKey.currentState.save();
       List<String> idList = [];
-      date = DateFormat("dd.MM.yy").format(DateTime.now());
+      date = DateTime.now();
       Navigator.pop(context);
       //setState(() {
       for (int i = 0; i < selection.length; i++) {
         //selection[i].payments.add(
         // Payment(date: DateFormat("dd.MM.yy").format(DateTime.now()), reason: reason, amount: amount));  //https://stackoverflow.com/questions/51696478/datetime-flutter
         idList.add(selection[i].studID);
-        DatabaseService().updateStudentData(selection[i].studID, selection[i].name, selection[i].vorname, selection[i].balance + amount, widget.user.uid);
+        DatabaseService().updateStudentData(
+            selection[i].studID,
+            selection[i].name,
+            selection[i].vorname,
+            selection[i].balance + amount,
+            widget.user.uid);
         //selection[i].balance += amount;
       }
       DatabaseService().updatePaymentData(date, reason, amount, idList);
@@ -207,7 +212,7 @@ class _HomeState extends State<Home> {
   String vorname;
   double balance;
 
-  String date;
+  DateTime date;
   String reason;
   double amount;
 
@@ -272,20 +277,14 @@ class _HomeState extends State<Home> {
             print(value);
             switch (value) {
               case 1:
-                {
-                  print("test");
-                  break;
-                }
+                print("test");
+                break;
               case 2:
-                {
-                  await _auth.signOut();
-                  break;
-                }
+                await _auth.signOut();
+                break;
               default:
-                {
-                  print("error");
-                  break;
-                }
+                print("error");
+                break;
             }
           },
         )
@@ -296,6 +295,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final students = Provider.of<List<Student>>(context) ?? [];
+    students.sort((a, b) => a.name.compareTo(b.name));       //https://stackoverflow.com/questions/53547997/sort-a-list-of-objects-in-flutter-dart-by-property-value
     return Scaffold(
       appBar: bar(),
       body: ListView(

@@ -18,7 +18,8 @@ class _PayTableState extends State<PayTable> {
   
   DataRow payRow(payment) {
     return DataRow(cells: [
-      DataCell(Text(payment.date)),
+      //DataCell(Text(payment.date)),
+      DataCell(Text(form.format(payment.date))),
       DataCell(Text(payment.reason)),
       DataCell(Text(payment.amount.toString())),
     ]);
@@ -27,6 +28,7 @@ class _PayTableState extends State<PayTable> {
   @override
   Widget build(BuildContext context) {
     final payments = Provider.of<List<Payment>>(context) ?? [];
+    payments.sort((a, b) => a.date.compareTo(b.date)); 
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.green,

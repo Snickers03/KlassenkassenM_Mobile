@@ -36,8 +36,9 @@ class DatabaseService {
     });
   }
 
-  Future updatePaymentData(String date, String reason, double amount, List<String> selectedStudents) async {
+  Future updatePaymentData(DateTime date, String reason, double amount, List<String> selectedStudents) async {
     return await paymentCollection.document(uid).setData({
+      //"date": FieldValue.serverTimestamp(),
       "date": date,
       "reason": reason,
       "amount": amount,
@@ -61,7 +62,7 @@ class DatabaseService {
   List<Payment> _paymentListFromSnapshot(QuerySnapshot snapshot) {
     return snapshot.documents.map((doc) {
       return Payment(
-        date: (doc.data["date"] ?? ""),
+        date: DateTime.parse(doc.data["date"].toDate().toString()),   //needs default value
         reason: doc.data["reason"] ?? "",
         amount: (doc.data["amount"] ?? 0).toDouble(),
         );
@@ -73,21 +74,16 @@ class DatabaseService {
   }
 
   Stream<List<Student>> get students {
-    //final user = Provider.of<User>(context);
-    //print("why tho? $uid");
-    //print(user.)
     return studentCollection
     .where("from", isEqualTo: user.uid)
-    //.orderBy("name")
     .snapshots()
     .map(_studentListFromSnapshot);
   }
 
   Stream<List<Payment>> get payments {
-    print(student.studID);
+    //print("studID: ${student.studID}");
     return paymentCollection
     .where("from", arrayContains: student.studID)   //law and order
-    //.orderBy(field)
     .snapshots()
     .map(_paymentListFromSnapshot);
   }
