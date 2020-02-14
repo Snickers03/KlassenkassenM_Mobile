@@ -128,45 +128,66 @@ class _HomeState extends State<Home> {
   }
 
   Widget payDialog() {
+    date = null;
     return AlertDialog(
       title: Text("Zahlung erfassen"),
-      content: Form(
-        key: formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            /*TextFormField(
-              decoration: InputDecoration(
-                hintText: "Datum",
-              ),
-              validator: (input) =>
-                  input.length == 0 ? "Name erforderlich" : null,
-              onSaved: (input) => datum = input,
-            ),*/
-            TextFormField(
-              decoration: InputDecoration(
-                hintText: "Zahlungsgrund",
-              ),
-              validator: (input) =>
-                  input.length == 0 ? "Grund erforderlich" : null,
-              onSaved: (input) => reason = input,
+      content: StatefulBuilder(
+        builder: (context, StateSetter setState) {     
+          return Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                RaisedButton(
+                  child: Text(date == null
+                      ? "Datum: " + DateFormat('dd.MM.yyyy').format(DateTime.now())
+                      : "Datum: " + DateFormat('dd.MM.yyyy').format(date)),
+                  onPressed: () {
+                    showDatePicker(
+                            context: context,
+                            initialDate: date == null ? DateTime.now() : date,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2200))
+                        .then((newdate) {
+                      setState(() {
+                        date = newdate;
+                      });
+                    });
+                  },
+                  /*decoration: InputDecoration(
+                    hintText: "Datum",
+                  ),
+                  validator: (input) =>
+                      input.length == 0 ? "Name erforderlich" : null,*/
+                  //onSaved: (input) => date = input,
+                ),
+                TextFormField(
+                  //initialValue: "eifach",
+                  decoration: InputDecoration(
+                    hintText: "Zahlungsgrund",
+                  ),
+                  validator: (input) =>
+                      input.length == 0 ? "Grund erforderlich" : null,
+                  onSaved: (input) => reason = input,
+                ),
+                TextFormField(
+                  decoration: InputDecoration(
+                    hintText: "Betrag",
+                  ),
+                  keyboardType: TextInputType.number,
+                  /*inputFormatters: <DecimalTextInputFormatter()*/
+                  onSaved: (input) => amount = double.parse(input),
+                ),
+                RaisedButton(
+                  onPressed: () {
+                    submitPay();
+                  },
+                  child: Text("Speichern"),
+                ),
+              ],
             ),
-            TextFormField(
-              decoration: InputDecoration(
-                hintText: "Betrag",
-              ),
-              keyboardType: TextInputType.number,
-              /*inputFormatters: <DecimalTextInputFormatter()*/
-              onSaved: (input) => amount = double.parse(input),
-            ),
-            RaisedButton(
-              onPressed: () {
-                submitPay();
-              },
-              child: Text("Speichern"),
-            )
-          ],
-        ),
+          );
+        }
       ),
     );
   }
@@ -187,7 +208,7 @@ class _HomeState extends State<Home> {
     if (formKey.currentState.validate()) {
       formKey.currentState.save();
       List<String> idList = [];
-      date = DateTime.now();
+      date = date == null ? DateTime.now() : date;    //current date when date equals null
       Navigator.pop(context);
       //setState(() {
       for (int i = 0; i < selection.length; i++) {
@@ -295,7 +316,8 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final students = Provider.of<List<Student>>(context) ?? [];
-    students.sort((a, b) => a.name.compareTo(b.name));       //https://stackoverflow.com/questions/53547997/sort-a-list-of-objects-in-flutter-dart-by-property-value
+    students.sort((a, b) => a.name.compareTo(b
+        .name)); //https://stackoverflow.com/questions/53547997/sort-a-list-of-objects-in-flutter-dart-by-property-value
     return Scaffold(
       appBar: bar(),
       body: ListView(
