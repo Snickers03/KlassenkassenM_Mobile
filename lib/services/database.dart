@@ -69,6 +69,10 @@ class DatabaseService {
     }).toList();
   }
 
+  Future deleteStudents() {
+    
+  }
+
   Stream<QuerySnapshot> get users {
     return userCollection.snapshots();
   }

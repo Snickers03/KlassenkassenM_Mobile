@@ -19,9 +19,10 @@ class _PayTableState extends State<PayTable> {
   DataRow payRow(payment) {
     return DataRow(cells: [
       //DataCell(Text(payment.date)),
-      DataCell(Text(form.format(payment.date))),
+      DataCell(Text(form.format(payment.date)),
+      showEditIcon: true),
       DataCell(Text(payment.reason)),
-      DataCell(Text(payment.amount.toString())),
+      DataCell(Text(payment.amount.toStringAsFixed(2))),
     ]);
   }
 

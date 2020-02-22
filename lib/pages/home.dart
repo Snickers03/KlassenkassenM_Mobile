@@ -34,7 +34,7 @@ class _HomeState extends State<Home> {
         selected: selection.contains(stud),
         onSelectChanged: (sel) {
           print(stud.name);
-          onSelectedRow(sel, stud);
+          //onSelectedRow(sel, stud);
         },
         //selected: true,
         cells: [
@@ -54,7 +54,7 @@ class _HomeState extends State<Home> {
           }),
           DataCell(Text(stud.balance.toString()), onTap: () {
             rowTapped(stud);
-          }),
+          }, showEditIcon: true),
         ]);
   }
 
@@ -71,12 +71,15 @@ class _HomeState extends State<Home> {
                 child: PayTable(stud: stud))));
   }
 
-  onSelectedRow(bool sel, Student stud) async {
+  onSelectedRow(Student stud) async {
     setState(() {
-      if (sel == true) {
+      if (!selection.contains(stud)) {
         selection.add(stud);
       } else {
         selection.remove(stud);
+        if (selection.length == 0) {      //end selectionMode if no student selected anymore
+          selectionMode = false;
+        }
       }
     });
   }
@@ -131,64 +134,63 @@ class _HomeState extends State<Home> {
     date = null;
     return AlertDialog(
       title: Text("Zahlung erfassen"),
-      content: StatefulBuilder(
-        builder: (context, StateSetter setState) {     
-          return Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                RaisedButton(
-                  child: Text(date == null
-                      ? "Datum: " + DateFormat('dd.MM.yyyy').format(DateTime.now())
-                      : "Datum: " + DateFormat('dd.MM.yyyy').format(date)),
-                  onPressed: () {
-                    showDatePicker(
-                            context: context,
-                            initialDate: date == null ? DateTime.now() : date,
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2200))
-                        .then((newdate) {
-                      setState(() {
-                        date = newdate;
-                      });
+      content: StatefulBuilder(builder: (context, StateSetter setState) {
+        return Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              RaisedButton(
+                child: Text(date == null
+                    ? "Datum: " +
+                        DateFormat('dd.MM.yyyy').format(DateTime.now())
+                    : "Datum: " + DateFormat('dd.MM.yyyy').format(date)),
+                onPressed: () {
+                  showDatePicker(
+                          context: context,
+                          initialDate: date == null ? DateTime.now() : date,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2200))
+                      .then((newdate) {
+                    setState(() {
+                      date = newdate;
                     });
-                  },
-                  /*decoration: InputDecoration(
+                  });
+                },
+                /*decoration: InputDecoration(
                     hintText: "Datum",
                   ),
                   validator: (input) =>
                       input.length == 0 ? "Name erforderlich" : null,*/
-                  //onSaved: (input) => date = input,
+                //onSaved: (input) => date = input,
+              ),
+              TextFormField(
+                //initialValue: "eifach",
+                decoration: InputDecoration(
+                  hintText: "Zahlungsgrund",
                 ),
-                TextFormField(
-                  //initialValue: "eifach",
-                  decoration: InputDecoration(
-                    hintText: "Zahlungsgrund",
-                  ),
-                  validator: (input) =>
-                      input.length == 0 ? "Grund erforderlich" : null,
-                  onSaved: (input) => reason = input,
+                validator: (input) =>
+                    input.length == 0 ? "Grund erforderlich" : null,
+                onSaved: (input) => reason = input,
+              ),
+              TextFormField(
+                decoration: InputDecoration(
+                  hintText: "Betrag",
                 ),
-                TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "Betrag",
-                  ),
-                  keyboardType: TextInputType.number,
-                  /*inputFormatters: <DecimalTextInputFormatter()*/
-                  onSaved: (input) => amount = double.parse(input),
-                ),
-                RaisedButton(
-                  onPressed: () {
-                    submitPay();
-                  },
-                  child: Text("Speichern"),
-                ),
-              ],
-            ),
-          );
-        }
-      ),
+                keyboardType: TextInputType.number,
+                /*inputFormatters: <DecimalTextInputFormatter()*/
+                onSaved: (input) => amount = double.parse(input),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  submitPay();
+                },
+                child: Text("Speichern"),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 
@@ -208,7 +210,9 @@ class _HomeState extends State<Home> {
     if (formKey.currentState.validate()) {
       formKey.currentState.save();
       List<String> idList = [];
-      date = date == null ? DateTime.now() : date;    //current date when date equals null
+      date = date == null
+          ? DateTime.now()
+          : date; //current date when date equals null
       Navigator.pop(context);
       //setState(() {
       for (int i = 0; i < selection.length; i++) {
@@ -241,7 +245,16 @@ class _HomeState extends State<Home> {
 
   AppBar bar() {
     return AppBar(
-      title: Text("Übersicht"),
+      title: !selectionMode ? Text("Übersicht") : Text("${selection.length} ausgewählt"),
+      leading: !selectionMode ? null : IconButton(
+        icon: Icon(Icons.close),
+        onPressed: () {
+          setState(() {
+            selectionMode = false;    //leave selection mode
+            selection.clear();
+          });
+        },
+      ),
       backgroundColor: Colors.green,
       actions: <Widget>[
         IconButton(
@@ -260,7 +273,7 @@ class _HomeState extends State<Home> {
         IconButton(
           icon: Icon(Icons.attach_money),
           onPressed: () {
-            if (selection.length <= 0) {
+            if (selection.length == 0 || selection == null) {
               showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -313,6 +326,8 @@ class _HomeState extends State<Home> {
     );
   }
 
+  bool selectionMode = false;
+
   @override
   Widget build(BuildContext context) {
     final students = Provider.of<List<Student>>(context) ?? [];
@@ -320,8 +335,88 @@ class _HomeState extends State<Home> {
         .name)); //https://stackoverflow.com/questions/53547997/sort-a-list-of-objects-in-flutter-dart-by-property-value
     return Scaffold(
       appBar: bar(),
-      body: ListView(
-        children: <Widget>[
+      body: ListView.separated(
+        separatorBuilder: (context, index) => Divider(
+          height: 1, //remove padding
+          color: Colors.grey[270],
+        ),
+        itemCount: students == null ? 1 : students.length + 1,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 0) {
+            return ListTile(
+                title: Row(
+              children: <Widget>[
+                Expanded(
+                  flex: 2,
+                  child: Text("Name"),
+                  //width: ,
+                  //color: Colors.blue,
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text("Vorname"),
+                ),
+                //SizedBox(width: 10,),
+                Expanded(
+                    flex: 1,
+                    child: Text(
+                      "Guthaben",
+                      textAlign: TextAlign.right,
+                    )),
+              ],
+            ));
+          }
+          index--;
+          return ListTile(
+            selected: selection.contains(students[index]),
+            contentPadding: null,
+            dense: true,
+            onTap: () {
+              if (selectionMode) {
+                onSelectedRow(students[index]);   //toggle selection
+              } else {
+                rowTapped(students[index]);       //show payments
+              }
+            },
+            onLongPress: () {
+              if (!selectionMode) {
+              setState(() {
+                selectionMode = true;
+                selection.add(students[index]);
+              });
+              }
+            },
+            title: Row(
+              //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Expanded(
+                  flex: 2,
+                  child: Text(students[index].name),
+                  //width: ,
+                  //color: Colors.blue,
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(students[index].vorname),
+                ),
+                //SizedBox(width: 10,),
+                Expanded(
+                    flex: 1,
+                    child: Text(
+                      students[index].balance.toStringAsFixed(2),
+                      textAlign: TextAlign.right,
+                    )),
+              ],
+            ),
+            //color: Colors.green,
+            /*height: 30,
+            decoration: BoxDecoration(
+              color: Colors.green,
+              border: Border.all(color: Colors.black)
+            ),*/
+          );
+        },
+        /*children: <Widget>[
           DataTable(
             horizontalMargin: 15,
             //columnSpacing: 10,
@@ -333,7 +428,7 @@ class _HomeState extends State<Home> {
             rows: students.map((student) => tableRow(student)).toList(),
           ),
           //StudentList(selection: selection, rowTapped: rowTapped, onSelectedRow: onSelectedRow, isSelected: isSelected,),
-        ],
+        ],*/
       ),
       /*floatingActionButton: FloatingActionButton(
     onPressed: () {
