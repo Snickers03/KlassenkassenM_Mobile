@@ -21,15 +21,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  /*List<Student> students = [
-    Student(name: "Schellenbaum", vorname: "Nic", balance: 50),
-    Student(name: "Maurer", vorname: "Ueli", balance: 50),
-    Student(name: "DeVito", vorname: "Danny", balance: 50),
-  ];*/
-
   List<Student> selection = [];
 
-  DataRow tableRow(stud) {
+  /*DataRow tableRow(stud) {
     return DataRow(
         selected: selection.contains(stud),
         onSelectChanged: (sel) {
@@ -56,11 +50,7 @@ class _HomeState extends State<Home> {
             rowTapped(stud);
           }, showEditIcon: true),
         ]);
-  }
-
-  bool isSelected(stud) {
-    return selection.contains(stud);
-  }
+  }*/
 
   void rowTapped(Student stud) {
     Navigator.push(
@@ -77,7 +67,8 @@ class _HomeState extends State<Home> {
         selection.add(stud);
       } else {
         selection.remove(stud);
-        if (selection.length == 0) {      //end selectionMode if no student selected anymore
+        if (selection.length == 0) {
+          //end selectionMode if no student selected anymore
           selectionMode = false;
         }
       }
@@ -228,6 +219,7 @@ class _HomeState extends State<Home> {
         //selection[i].balance += amount;
       }
       DatabaseService().updatePaymentData(date, reason, amount, idList);
+      selectionMode = false;
       //});
     }
   }
@@ -245,16 +237,7 @@ class _HomeState extends State<Home> {
 
   AppBar bar() {
     return AppBar(
-      title: !selectionMode ? Text("Übersicht") : Text("${selection.length} ausgewählt"),
-      leading: !selectionMode ? null : IconButton(
-        icon: Icon(Icons.close),
-        onPressed: () {
-          setState(() {
-            selectionMode = false;    //leave selection mode
-            selection.clear();
-          });
-        },
-      ),
+      title: Text("Übersicht"),
       backgroundColor: Colors.green,
       actions: <Widget>[
         IconButton(
@@ -270,7 +253,7 @@ class _HomeState extends State<Home> {
             });
           },
         ),
-        IconButton(
+        /*IconButton(
           icon: Icon(Icons.attach_money),
           onPressed: () {
             if (selection.length == 0 || selection == null) {
@@ -291,7 +274,7 @@ class _HomeState extends State<Home> {
               });
             }
           },
-        ),
+        ),*/
         PopupMenuButton(
           //onSelected: (result) { setState(() { _selection = result; }); },
           itemBuilder: (BuildContext context) => <PopupMenuEntry>[
@@ -326,15 +309,101 @@ class _HomeState extends State<Home> {
     );
   }
 
+  AppBar selectionBar() {
+    return AppBar(
+      title: Text("${selection.length} ausgewählt"),
+      leading: IconButton(
+        icon: Icon(Icons.close),
+        onPressed: () {
+          setState(() {
+            selectionMode = false; //leave selection mode
+            selection.clear();
+          });
+        },
+      ),
+      backgroundColor: Colors.green,
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(Icons.select_all),
+          onPressed: () {
+            setState(() {
+              if (selection.length != students.length) {
+                selection.clear();
+                for (int i = 0; i < students.length; i++) {
+                  selection.add(students[i]);
+                }
+              } else {
+                selection.clear();
+              }                    
+            });
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.attach_money),
+          onPressed: () {
+            if (selection.length == 0 || selection == null) {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text("Kein Schüler ausgewählt"),
+                    );
+                  });
+            } else {
+              setState(() {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return payDialog();
+                    });
+              });
+            }
+          },
+        ),
+        PopupMenuButton(
+          //onSelected: (result) { setState(() { _selection = result; }); },
+          itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+            PopupMenuItem(
+              value: 1,
+              child: Text("Löschen"),
+            ),
+            PopupMenuDivider(
+              height: 5,
+            ),
+            PopupMenuItem(
+              value: 2,
+              child: Text("Abmelden"),
+            ),
+          ],
+          onSelected: (value) async {
+            print(value);
+            switch (value) {
+              case 1:
+                DatabaseService().deleteStudents(selection);
+                break;
+              case 2:
+                await _auth.signOut();
+                break;
+              default:
+                print("error");
+                break;
+            }
+          },
+        )
+      ],
+    );
+  }
+
   bool selectionMode = false;
+  List students;
 
   @override
   Widget build(BuildContext context) {
-    final students = Provider.of<List<Student>>(context) ?? [];
+    students = Provider.of<List<Student>>(context) ?? [];
     students.sort((a, b) => a.name.compareTo(b
         .name)); //https://stackoverflow.com/questions/53547997/sort-a-list-of-objects-in-flutter-dart-by-property-value
     return Scaffold(
-      appBar: bar(),
+      appBar: selectionMode ? selectionBar() : bar(),
       body: ListView.separated(
         separatorBuilder: (context, index) => Divider(
           height: 1, //remove padding
@@ -367,53 +436,61 @@ class _HomeState extends State<Home> {
             ));
           }
           index--;
-          return ListTile(
-            selected: selection.contains(students[index]),
-            contentPadding: null,
-            dense: true,
-            onTap: () {
-              if (selectionMode) {
-                onSelectedRow(students[index]);   //toggle selection
-              } else {
-                rowTapped(students[index]);       //show payments
-              }
-            },
-            onLongPress: () {
-              if (!selectionMode) {
-              setState(() {
-                selectionMode = true;
-                selection.add(students[index]);
-              });
-              }
-            },
-            title: Row(
-              //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Expanded(
-                  flex: 2,
-                  child: Text(students[index].name),
-                  //width: ,
-                  //color: Colors.blue,
+          return Container(
+            color: selection.contains(students[index])
+                ? Colors.blue[500]
+                : Colors.transparent,
+            child: ListTileTheme(
+              selectedColor: Colors.white,
+              child: ListTile(
+                selected: selection.contains(students[index]),
+                contentPadding: null,
+                dense: true,
+                onTap: () {
+                  if (selectionMode) {
+                    onSelectedRow(students[index]); //toggle selection
+                  } else {
+                    rowTapped(students[index]); //show payments
+                  }
+                },
+                onLongPress: () {
+                  if (!selectionMode) {
+                    setState(() {
+                      selectionMode = true;
+                      selection.add(students[index]);
+                    });
+                  }
+                },
+                title: Row(
+                  //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Expanded(
+                      flex: 2,
+                      child: Text(students[index].name),
+                      //width: ,
+                      //color: Colors.blue,
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(students[index].vorname),
+                    ),
+                    //SizedBox(width: 10,),
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          students[index].balance.toStringAsFixed(2),
+                          textAlign: TextAlign.right,
+                        )),
+                  ],
                 ),
-                Expanded(
-                  flex: 2,
-                  child: Text(students[index].vorname),
-                ),
-                //SizedBox(width: 10,),
-                Expanded(
-                    flex: 1,
-                    child: Text(
-                      students[index].balance.toStringAsFixed(2),
-                      textAlign: TextAlign.right,
-                    )),
-              ],
+                //color: Colors.green,
+                /*height: 30,
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  border: Border.all(color: Colors.black)
+                ),*/
+              ),
             ),
-            //color: Colors.green,
-            /*height: 30,
-            decoration: BoxDecoration(
-              color: Colors.green,
-              border: Border.all(color: Colors.black)
-            ),*/
           );
         },
         /*children: <Widget>[

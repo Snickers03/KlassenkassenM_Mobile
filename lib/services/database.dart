@@ -69,8 +69,8 @@ class DatabaseService {
     }).toList();
   }
 
-  Future deleteStudents() {
-    
+  Future deleteStudents(List<Student> selection) {
+    //dothis
   }
 
   Stream<QuerySnapshot> get users {
