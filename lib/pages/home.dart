@@ -309,7 +309,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  AppBar selectionBar() {
+  AppBar selectionBar(List<Student> students) {
     return AppBar(
       title: Text("${selection.length} ausgewählt"),
       leading: IconButton(
@@ -332,9 +332,9 @@ class _HomeState extends State<Home> {
                 for (int i = 0; i < students.length; i++) {
                   selection.add(students[i]);
                 }
-              } else {
+              } /*else {
                 selection.clear();
-              }                    
+              }       */             
             });
           },
         ),
@@ -380,6 +380,10 @@ class _HomeState extends State<Home> {
             switch (value) {
               case 1:
                 DatabaseService().deleteStudents(selection);
+                setState(() {
+                  selection.clear();
+                  selectionMode = false;
+                });
                 break;
               case 2:
                 await _auth.signOut();
@@ -395,53 +399,15 @@ class _HomeState extends State<Home> {
   }
 
   bool selectionMode = false;
-  List students;
+  //List students;  //useless?
 
-  @override
-  Widget build(BuildContext context) {
-    students = Provider.of<List<Student>>(context) ?? [];
-    students.sort((a, b) => a.name.compareTo(b
-        .name)); //https://stackoverflow.com/questions/53547997/sort-a-list-of-objects-in-flutter-dart-by-property-value
-    return Scaffold(
-      appBar: selectionMode ? selectionBar() : bar(),
-      body: ListView.separated(
-        separatorBuilder: (context, index) => Divider(
-          height: 1, //remove padding
-          color: Colors.grey[270],
-        ),
-        itemCount: students == null ? 1 : students.length + 1,
-        itemBuilder: (BuildContext context, int index) {
-          if (index == 0) {
-            return ListTile(
-                title: Row(
-              children: <Widget>[
-                Expanded(
-                  flex: 2,
-                  child: Text("Name"),
-                  //width: ,
-                  //color: Colors.blue,
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text("Vorname"),
-                ),
-                //SizedBox(width: 10,),
-                Expanded(
-                    flex: 1,
-                    child: Text(
-                      "Guthaben",
-                      textAlign: TextAlign.right,
-                    )),
-              ],
-            ));
-          }
-          index--;
-          return Container(
+  Widget tableRow(int index, List<Student> students) {
+    return Container(
             color: selection.contains(students[index])
-                ? Colors.blue[500]
+                ? Colors.grey[300]
                 : Colors.transparent,
             child: ListTileTheme(
-              selectedColor: Colors.white,
+              selectedColor: Colors.black,
               child: ListTile(
                 selected: selection.contains(students[index]),
                 contentPadding: null,
@@ -492,33 +458,50 @@ class _HomeState extends State<Home> {
               ),
             ),
           );
-        },
-        /*children: <Widget>[
-          DataTable(
-            horizontalMargin: 15,
-            //columnSpacing: 10,
-            columns: [
-              DataColumn(label: Text("Name")),
-              DataColumn(label: Text("Vorname")),
-              DataColumn(label: Text("Guthaben"), numeric: true),
-            ],
-            rows: students.map((student) => tableRow(student)).toList(),
-          ),
-          //StudentList(selection: selection, rowTapped: rowTapped, onSelectedRow: onSelectedRow, isSelected: isSelected,),
-        ],*/
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final students = Provider.of<List<Student>>(context) ?? [];
+    students.sort((a, b) => a.name.compareTo(b
+        .name)); //https://stackoverflow.com/questions/53547997/sort-a-list-of-objects-in-flutter-dart-by-property-value
+    return Scaffold(
+      appBar: selectionMode ? selectionBar(students) : bar(),
+      body: ListView.separated(
+        separatorBuilder: (context, index) => Divider(
+          height: 2, //remove padding
+          color: Colors.grey[400],
+        ),
+        itemCount: students == null ? 1 : students.length + 1,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 0) {
+            return ListTile(
+                title: Row(
+              children: <Widget>[
+                Expanded(
+                  flex: 2,
+                  child: Text("Name"),
+                  //width: ,
+                  //color: Colors.blue,
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text("Vorname"),
+                ),
+                //SizedBox(width: 10,),
+                Expanded(
+                    flex: 1,
+                    child: Text(
+                      "Guthaben",
+                      textAlign: TextAlign.right,
+                    )),
+              ],
+            ));
+          }
+          index--;
+          return tableRow(index, students);
+        },   
       ),
-      /*floatingActionButton: FloatingActionButton(
-    onPressed: () {
-      setState(() {
-        showDialog(
-            context: context,S
-            builder: (BuildContext context) {
-              return addDialog();
-            });
-      });
-    },
-    child: Icon(Icons.add),
-        ),*/
     );
   }
 }
