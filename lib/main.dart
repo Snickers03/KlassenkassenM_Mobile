@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
           '/home': (context) => Home(),
           '/pay_table': (context) => PayTable(
                 stud: null,
+                user: null,
               ),
           '/wrapper': (context) => Wrapper(),
         },

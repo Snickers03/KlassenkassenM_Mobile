@@ -58,7 +58,7 @@ class _HomeState extends State<Home> {
         MaterialPageRoute(
             builder: (context) => StreamProvider<List<Payment>>.value(
                 value: DatabaseService(student: stud).payments,
-                child: PayTable(stud: stud))));
+                child: PayTable(stud: stud, user: widget.user))));
   }
 
   onSelectedRow(Student stud) async {
@@ -253,28 +253,6 @@ class _HomeState extends State<Home> {
             });
           },
         ),
-        /*IconButton(
-          icon: Icon(Icons.attach_money),
-          onPressed: () {
-            if (selection.length == 0 || selection == null) {
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text("Kein Schüler ausgewählt"),
-                    );
-                  });
-            } else {
-              setState(() {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return payDialog();
-                    });
-              });
-            }
-          },
-        ),*/
         PopupMenuButton(
           //onSelected: (result) { setState(() { _selection = result; }); },
           itemBuilder: (BuildContext context) => <PopupMenuEntry>[
@@ -332,9 +310,10 @@ class _HomeState extends State<Home> {
                 for (int i = 0; i < students.length; i++) {
                   selection.add(students[i]);
                 }
-              } /*else {
+              }
+              /*else {
                 selection.clear();
-              }       */             
+              }       */
             });
           },
         ),
@@ -403,61 +382,69 @@ class _HomeState extends State<Home> {
 
   Widget tableRow(int index, List<Student> students) {
     return Container(
-            color: selection.contains(students[index])
-                ? Colors.grey[300]
-                : Colors.transparent,
-            child: ListTileTheme(
-              selectedColor: Colors.black,
-              child: ListTile(
-                selected: selection.contains(students[index]),
-                contentPadding: null,
-                dense: true,
-                onTap: () {
-                  if (selectionMode) {
-                    onSelectedRow(students[index]); //toggle selection
-                  } else {
-                    rowTapped(students[index]); //show payments
-                  }
-                },
-                onLongPress: () {
-                  if (!selectionMode) {
-                    setState(() {
-                      selectionMode = true;
-                      selection.add(students[index]);
-                    });
-                  }
-                },
-                title: Row(
-                  //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Expanded(
-                      flex: 2,
-                      child: Text(students[index].name),
-                      //width: ,
-                      //color: Colors.blue,
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(students[index].vorname),
-                    ),
-                    //SizedBox(width: 10,),
-                    Expanded(
-                        flex: 1,
-                        child: Text(
-                          students[index].balance.toStringAsFixed(2),
-                          textAlign: TextAlign.right,
-                        )),
-                  ],
+      color: selection.contains(students[index])
+          ? Colors.grey[300]
+          : Colors.transparent,
+      child: ListTileTheme(
+        selectedColor: Colors.black,
+        //contentPadding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+        child: ListTile(
+          selected: selection.contains(students[index]),
+          contentPadding: null,
+          dense: true,
+          onTap: () {
+            if (selectionMode) {
+              onSelectedRow(students[index]); //toggle selection
+            } else {
+              rowTapped(students[index]); //show payments
+            }
+          },
+          onLongPress: () {
+            if (!selectionMode) {
+              setState(() {
+                selectionMode = true;
+                selection.add(students[index]);
+              });
+            }
+          },
+          title: Row(
+            //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Expanded(
+                flex: 2,
+                child: Text(
+                  students[index].name,
+                  style: TextStyle(fontSize: 13),
                 ),
-                //color: Colors.green,
-                /*height: 30,
+                //width: ,
+                //color: Colors.blue,
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  students[index].vorname,
+                  style: TextStyle(fontSize: 13),
+                  ),
+              ),
+              //SizedBox(width: 10,),
+              Expanded(
+                  flex: 1,
+                  child: Text(
+                    students[index].balance.toStringAsFixed(2),
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontSize: 13),
+                  )),
+            ],
+          ),
+          //color: Colors.green,
+          /*height: 30,
                 decoration: BoxDecoration(
                   color: Colors.green,
                   border: Border.all(color: Colors.black)
                 ),*/
-              ),
-            ),
-          );
+        ),
+      ),
+    );
   }
 
   @override
@@ -470,12 +457,14 @@ class _HomeState extends State<Home> {
       body: ListView.separated(
         separatorBuilder: (context, index) => Divider(
           height: 2, //remove padding
-          color: Colors.grey[400],
+          color: selection.contains(students[index]) ? Colors.black : Colors.grey[400], //modify
+          //indent: 0,
         ),
         itemCount: students == null ? 1 : students.length + 1,
         itemBuilder: (BuildContext context, int index) {
           if (index == 0) {
             return ListTile(
+                //table header
                 title: Row(
               children: <Widget>[
                 Expanded(
@@ -499,8 +488,8 @@ class _HomeState extends State<Home> {
             ));
           }
           index--;
-          return tableRow(index, students);
-        },   
+          return tableRow(index, students); //display students
+        },
       ),
     );
   }
