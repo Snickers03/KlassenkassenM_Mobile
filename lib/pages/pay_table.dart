@@ -9,7 +9,8 @@ import 'package:klassenk_mobile/models/user.dart';
 class PayTable extends StatefulWidget {
   final Student stud;
   final User user;
-  PayTable({Key key, @required this.stud, @required this.user}) : super(key: key);
+  PayTable({Key key, @required this.stud, @required this.user})
+      : super(key: key);
 
   @override
   _PayTableState createState() => _PayTableState();
@@ -17,7 +18,7 @@ class PayTable extends StatefulWidget {
 
 class _PayTableState extends State<PayTable> {
   var form = DateFormat('dd.MM.yy');
-  List paySelection = [];
+  List<Payment> paySelection = [];
   bool selectionMode = false;
 
   AppBar selectionBar() {
@@ -34,7 +35,17 @@ class _PayTableState extends State<PayTable> {
         },
       ),
       actions: <Widget>[
-    ],);
+        IconButton(
+          icon: Icon(Icons.delete), 
+          onPressed: () {
+            DatabaseService().deletePaymentsForSingle(paySelection, widget.stud.studID);
+            setState(() {
+              selectionMode = false;
+              paySelection.clear();
+            });
+            }
+        )],
+    );
   }
 
   DataRow payRow(payment) {
@@ -149,7 +160,6 @@ class _PayTableState extends State<PayTable> {
             TextFormField(
               decoration: InputDecoration(
                 hintText: "Nachname",
-                
               ),
               initialValue: widget.stud.name,
               validator: (input) =>
@@ -194,7 +204,8 @@ class _PayTableState extends State<PayTable> {
       });
       Navigator.pop(context);
       //widget.stud.studID;
-      DatabaseService().updateStudentData(widget.stud.studID, widget.stud.name, widget.stud.vorname, widget.stud.balance, widget.user.uid);
+      DatabaseService().updateStudentData(widget.stud.studID, widget.stud.name,
+          widget.stud.vorname, widget.stud.balance, widget.user.uid);
     }
   }
 
@@ -215,24 +226,28 @@ class _PayTableState extends State<PayTable> {
     final payments = Provider.of<List<Payment>>(context) ?? [];
     payments.sort((a, b) => a.date.compareTo(b.date));
     return Scaffold(
-      appBar: selectionMode ? selectionBar() : AppBar(
-        backgroundColor: Colors.green,
-        title: Text("${widget.stud.name} ${widget.stud.vorname}"),
-        actions: <Widget>[
-          IconButton(icon: Icon(Icons.edit), onPressed: () {
-            print("edit");
-            
-            setState(() {
-              //widget.stud.name = "dürum";
-               showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return editDialog();
-                  });
-            });
-          })
-        ],
-      ),
+      appBar: selectionMode
+          ? selectionBar()
+          : AppBar(
+              backgroundColor: Colors.green,
+              title: Text("${widget.stud.name} ${widget.stud.vorname}"),
+              actions: <Widget>[
+                IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () {
+                      print("edit");
+
+                      setState(() {
+                        //widget.stud.name = "dürum";
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return editDialog();
+                            });
+                      });
+                    })
+              ],
+            ),
       body: ListView.separated(
         separatorBuilder: (context, index) => Divider(
           height: 2, //remove padding

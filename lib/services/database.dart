@@ -70,6 +70,7 @@ class DatabaseService {
             doc.data["date"].toDate().toString()), //needs default value
         reason: doc.data["reason"] ?? "",
         amount: (doc.data["amount"] ?? 0).toDouble(),
+        payID: doc.documentID,
       );
     }).toList();
   }
@@ -78,6 +79,20 @@ class DatabaseService {
     //do this you kek
     return selection.forEach((stud) {
       studentCollection.document(stud.studID).delete();
+    });
+  }
+
+  Future deletePaymentsForAll(List<Payment> selection) async {    //deletes payment for EVERYONE
+    return selection.forEach((pay) {
+      paymentCollection.document(pay.payID).delete();
+    });
+  }
+
+  Future deletePaymentsForSingle(List<Payment> selection, String studID) async {   //deletes payment for ONE
+    return selection.forEach((pay) {
+      paymentCollection.document(pay.payID).updateData({
+        "from": FieldValue.arrayRemove([studID])
+      });     //remove studID from array for all selected payments
     });
   }
 
